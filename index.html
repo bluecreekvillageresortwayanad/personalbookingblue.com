@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFLAH RESORT BOOKING | Personal Access</title>
+<style>
+  :root { --navy:#06264d; --teal:#147b86; --white:#f7fbff; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; min-height:100%; font-family:Arial, Helvetica, sans-serif; }
+  body { min-height:100vh; background:#eef3f5; }
+  .login-screen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:28px 18px; position:relative; overflow:hidden; isolation:isolate;
+    background:
+      linear-gradient(135deg, rgba(3,30,51,.32), rgba(2,29,54,.48)),
+      url("resort-background.jpeg") center center / cover no-repeat;
+  }
+  .login-screen::before { content:""; position:absolute; inset:0; z-index:-1;
+    backdrop-filter:blur(2px); background:rgba(4,31,48,.12); }
+  .login-card {
+    width:min(420px, 94vw); position:relative; margin-top:54px;
+    padding:104px 38px 34px; color:var(--white);
+    background:linear-gradient(145deg, rgba(22,130,143,.80), rgba(3,43,68,.84));
+    border:1px solid rgba(255,255,255,.25); box-shadow:0 22px 65px rgba(0,0,0,.32);
+    backdrop-filter:blur(12px);
+  }
+  .avatar {
+    position:absolute; top:-72px; left:50%; transform:translateX(-50%);
+    width:145px; height:145px; border-radius:50%; background:var(--navy);
+    border:1px solid rgba(255,255,255,.16); display:grid; place-items:center;
+    box-shadow:0 10px 30px rgba(0,0,0,.22);
+  }
+  .avatar svg { width:86px; height:86px; }
+  h1 { font-size:clamp(16px, 2.2vw, 20px); line-height:1.35; text-align:center;
+    letter-spacing:1.4px; margin:0 0 25px; font-weight:800; }
+  .field { display:flex; align-items:center; gap:13px; border-bottom:1px solid rgba(255,255,255,.8);
+    margin:0 0 22px; padding:0 0 8px; }
+  .field svg { flex:0 0 17px; width:17px; height:17px; fill:#fff; }
+  .field input { min-width:0; width:100%; color:#fff; font-size:14px; background:transparent;
+    border:0; outline:0; padding:4px 0; }
+  .field input::placeholder { color:rgba(255,255,255,.86); }
+  .field:focus-within { border-bottom:2px solid #fff; }
+  .options { display:flex; justify-content:flex-start; align-items:center; margin:8px 0 27px;
+    color:rgba(255,255,255,.72); font-size:12px; }
+  .options label { display:flex; gap:8px; align-items:center; cursor:pointer; }
+  .options input { accent-color:#fff; }
+  .login-btn { width:100%; border:0; background:var(--navy); color:white; padding:15px 12px;
+    font-weight:800; letter-spacing:1.4px; cursor:pointer; transition:.2s; }
+  .login-btn:hover { background:#0b3769; transform:translateY(-1px); }
+  .error { min-height:18px; color:#ffe0e0; text-align:center; font-size:12px; margin:-15px 0 12px; }
+  .dashboard { display:none; min-height:100vh; background:#fff; color:#182230; }
+  .topbar { width:100%; padding:22px clamp(18px,5vw,64px); border-bottom:1px solid #e8edf1;
+    display:flex; justify-content:center; background:#fff; position:sticky; top:0; z-index:5; }
+  .search-wrap { width:min(680px,100%); position:relative; }
+  .search-wrap svg { position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    width:19px; height:19px; opacity:.35; }
+  .search-wrap input { width:100%; border:1px solid #e1e7ec; border-radius:999px; padding:14px 20px 14px 46px;
+    font-size:15px; outline:none; background:#f8fafb; }
+  .search-wrap input::placeholder { color:rgba(42,56,70,.42); }
+  .search-wrap input:focus { border-color:#aab9c6; box-shadow:0 0 0 3px rgba(6,38,77,.06); }
+  .welcome { padding:48px clamp(20px,6vw,76px); }
+  .welcome h2 { margin:0 0 10px; font-size:clamp(25px,4vw,38px); }
+  .welcome p { margin:0; color:#687583; }
+  
+  .empty-result { margin-top:28px; color:#687583; font-size:14px; }
+  .property-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px; margin-top:28px; }
+  .property-card { border:1px solid #e0e7ec; border-radius:12px; padding:20px; background:#fff; box-shadow:0 6px 20px rgba(15,35,55,.06); }
+  .property-card h3 { margin:0 0 18px; overflow-wrap:anywhere; font-size:20px; }
+  .property-card .place-label { color:#64748b; font-size:12px; font-weight:800; letter-spacing:.8px; }
+  .property-card .place-value { margin:5px 0 18px; color:#263545; }
+  .small-green { border:0; border-radius:5px; background:#169447; color:#fff; padding:8px 16px; cursor:pointer; font-weight:700; }
+  .small-green:hover { background:#11783a; }
+  .small-red { border:0; border-radius:5px; background:#c62828; color:#fff; padding:8px 14px; cursor:pointer; font-weight:700; margin-left:8px; }
+  .print-button { border:0; border-radius:5px; background:#64748b; color:#fff; padding:8px 16px; cursor:pointer; font-weight:700; }
+  .report-save-row { display:flex; justify-content:flex-end; margin-top:18px; }
+  .summary-caption { margin:8px 0 0; color:#64748b; font-size:12px; }
+  .pencil-button { position:fixed; right:28px; bottom:26px; width:56px; height:56px; border:0; border-radius:50%; background:#06264d; color:white; box-shadow:0 8px 24px #0003; cursor:pointer; display:grid; place-items:center; z-index:20; }
+  .pencil-button svg { width:24px; height:24px; fill:currentColor; }
+  .property-modal { display:none; position:fixed; z-index:30; top:20px; left:50%; transform:translateX(-50%); width:min(560px,calc(100vw - 28px)); max-height:calc(100vh - 40px); overflow:auto; padding:26px; border:1px solid #dce4ea; border-radius:14px; background:white; box-shadow:0 20px 70px #0004; }
+  .property-modal h2 { margin:0 0 22px; font-size:23px; font-weight:900; letter-spacing:.4px; }
+  .property-modal label { display:block; margin:15px 0 7px; font-size:13px; font-weight:800; color:#263545; }
+  .property-modal input,.property-modal select { width:100%; padding:12px; border:1px solid #d5dee6; border-radius:7px; font:inherit; background:#fff; }
+  .modal-actions { display:flex; gap:10px; align-items:center; margin-top:20px; }
+  .cancel-btn { padding:8px 14px; border:1px solid #d5dee6; background:#fff; border-radius:5px; cursor:pointer; }
+  .form-note { color:#64748b; font-size:12px; margin:10px 0 0; }
+  .form-error { color:#b42318; font-size:13px; min-height:17px; margin:8px 0 0; }
+  .detail-page { min-height:100vh; padding:40px clamp(20px,6vw,76px) 100px; background:#f7f9fb; }
+  .detail-panel { max-width:900px; margin:30px auto; padding:32px; border:1px solid #e0e7ec; border-radius:14px; background:white; box-shadow:0 8px 28px #1020300d; }
+  .detail-panel h1 { text-align:left; letter-spacing:0; font-size:clamp(28px,4vw,42px); margin-bottom:24px; }
+  .detail-place-label { color:#64748b; font-size:12px; font-weight:800; letter-spacing:1px; }
+  .detail-place { font-size:20px; margin-top:6px; }
+  .detail-back { border:1px solid #d5dee6; border-radius:6px; padding:10px 14px; background:white; cursor:pointer; }
+  @media(max-width:480px) { .pencil-button { right:18px; bottom:18px; } .property-modal { padding:20px; } }
+
+
+  .guest-modal { display:none; position:fixed; z-index:40; inset:18px; margin:auto; width:min(900px,calc(100vw - 36px)); max-height:calc(100vh - 36px); overflow:auto; padding:26px; border:1px solid #dce4ea; border-radius:14px; background:white; box-shadow:0 20px 70px #0005; }
+  .guest-modal h2 { margin:0 0 20px; font-size:23px; font-weight:900; }
+  .guest-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 18px; }
+  .guest-field label { display:block; margin:13px 0 7px; font-size:12px; font-weight:800; color:#263545; }
+  .guest-field input,.guest-field select { width:100%; min-width:0; padding:11px; border:1px solid #d5dee6; border-radius:7px; font:inherit; background:#fff; }
+  .guest-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+  .guest-records { margin-top:26px; overflow-x:auto; }
+  .guest-records table { border-collapse:collapse; width:100%; background:white; font-size:13px; }
+  .guest-records th,.guest-records td { padding:11px; border:1px solid #e0e7ec; text-align:left; white-space:nowrap; }
+  .guest-records th { background:#f1f6f8; }
+  .agent-profit-field[hidden] { display:none; }
+  .detail-view { display:none; min-height:100vh; padding:30px clamp(18px,5vw,64px) 100px; background:#f7f9fb; }
+  .detail-view .detail-panel { margin:20px auto; }
+  @media(max-width:600px){ .guest-grid{grid-template-columns:1fr}.guest-modal{padding:18px} }
+
+  .summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin:28px 0 8px; }
+  .summary-card { min-height:150px; padding:22px; border:1px solid #e0e7ec; border-radius:12px; background:#fff; box-shadow:0 6px 20px rgba(15,35,55,.06); }
+  .summary-card h3 { margin:0 0 14px; font-size:14px; color:#64748b; letter-spacing:.5px; }
+  .summary-value { font-size:27px; font-weight:900; color:#147b48; }
+  .summary-value.unpaid-income { color:#8B0000; }
+  .top-properties { margin:0; padding-left:22px; line-height:1.9; font-weight:700; }
+  .detail-actions { display:flex; gap:10px; margin-top:28px; }
+  .report-modal { display:none; position:fixed; z-index:50; inset:20px; margin:auto; width:min(1050px,calc(100vw - 40px)); max-height:calc(100vh - 40px); overflow:auto; padding:24px; border:1px solid #dce4ea; border-radius:14px; background:white; box-shadow:0 20px 70px #0005; }
+  .report-options { display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 22px; }
+  .report-table-wrap { overflow-x:auto; }
+  .report-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .report-table th,.report-table td { padding:10px; border:1px solid #dce4ea; text-align:left; white-space:nowrap; }
+  .report-table th { background:#f1f6f8; }
+  .property-modal .optional-note { font-size:12px; color:#64748b; margin:5px 0 0; }
+  @media(max-width:600px){ .summary-grid{grid-template-columns:1fr}.detail-actions{flex-wrap:wrap} }
+  .logout { margin-top:30px; background:#06264d; color:white; border:0; padding:11px 18px; cursor:pointer; border-radius:6px; }
+  @media(max-width:480px) { .login-card { padding:96px 25px 28px; } .avatar { width:125px;height:125px;top:-62px; } .avatar svg { width:74px;height:74px; } }
+</style>
+</head>
+<body>
+<main class="login-screen" id="loginScreen">
+  <section class="login-card" aria-label="Login">
+    <div class="avatar" aria-hidden="true">
+      <svg viewBox="0 0 100 100" fill="none" stroke="white" stroke-width="2.5">
+        <circle cx="50" cy="29" r="21"></circle>
+        <path d="M9 91c2-23 19-39 41-39s39 16 41 39z"></path>
+      </svg>
+    </div>
+    <h1>ONLY FOR PERSONAL USE BY BLUE</h1>
+    <form id="loginForm" autocomplete="off">
+      <label class="field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 5h20v14H2V5zm1.5 1.5L12 13l8.5-6.5H3.5zM3 17.5h18V8l-9 6.7L3 8v9.5z"/></svg>
+        <input id="admin" name="admin" type="text" placeholder="Admin" aria-label="Admin" required>
+      </label>
+      <label class="field">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10h14V10a2 2 0 0 0-2-2zM10 6a2 2 0 0 1 4 0v2h-4V6zm3 9.7V18h-2v-2.3a2 2 0 1 1 2 0z"/></svg>
+        <input id="password" name="password" type="password" placeholder="Password" aria-label="Password" required>
+      </label>
+      <div class="options"><label><input type="checkbox" id="remember"> Remember me</label></div>
+      <p class="error" id="error" role="alert"></p>
+      <button class="login-btn" type="submit">LOGIN</button>
+    </form>
+  </section>
+</main>
+
+<main class="dashboard" id="dashboard">
+  <header class="topbar">
+    <label class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+      <input id="search" type="search" placeholder="Search..." aria-label="Search">
+    </label>
+  </header>
+  <section class="welcome">
+    <h2>Welcome, AFLAH</h2>
+    <p>You are signed in to your personal-use interface.</p>
+    <p class="empty-result" id="searchMessage"></p>
+    <div class="summary-grid">
+      <section class="summary-card"><h3>TOTAL INCOME · PAID</h3><div class="summary-value" id="paidIncome">₹0</div><p class="summary-caption">My profit from all PAID guest records</p></section>
+      <section class="summary-card"><h3>TOTAL INCOME · NOT PAID</h3><div class="summary-value unpaid-income" id="unpaidIncome">-₹0</div><p class="summary-caption">My profit from all NOT PAID guest records</p></section>
+    </div>
+    <div class="property-grid" id="propertyGrid" aria-live="polite"></div>
+    <button class="logout" id="logout" type="button">Log out</button>
+  </section>
+</main>
+
+
+<main class="detail-view" id="detailView">
+  <header class="topbar"><div class="search-wrap" style="font-weight:800;color:#06264d">AFLAH · PROPERTY DETAILS</div></header>
+  <section class="detail-panel">
+    <button class="detail-back" id="backToProperties" type="button">← Back to properties</button>
+    <h1 id="detailPropertyName" style="text-align:left;margin-top:24px"></h1>
+    <div class="detail-place-label">PLACE</div><div class="detail-place" id="detailPropertyPlace"></div>
+    <div class="guest-records"><h2>GUEST DETAILS</h2><div id="guestRecords"></div></div>
+    <div class="detail-actions"><button class="print-button" id="propertyPrintButton" type="button">PRINT</button></div>
+  </section>
+</main>
+
+<section class="property-modal" id="propertyModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <h2 id="modalTitle">ADD A PROPERTY</h2>
+  <form id="propertyForm">
+    <label for="propertyName">PROPERTY NAME</label>
+    <input id="propertyName" name="propertyName" type="text" placeholder="Enter property name" maxlength="100" required>
+    <label for="propertyPlace">PLACE</label>
+    <select id="propertyPlace" name="propertyPlace" required>
+      <option value="">Choose a place in Wayanad</option>
+      <option>Kalpetta</option><option>Sulthan Bathery</option><option>Mananthavady</option>
+      <option>Vythiri</option><option>Meppadi</option><option>Ambalavayal</option>
+      <option>Panamaram</option><option>Thariyode</option><option>Padinjarathara</option>
+      <option>Muttil</option><option>Pozhuthana</option><option>Thirunelly</option>
+      <option>Edavaka</option><option>Kaniyambetta</option><option>Vellamunda</option>
+      <option>Nenmeni</option><option>Muppainad</option><option>Wayanad (other)</option>
+    </select>
+    <label for="confirmationId">CONFIRMATION ID FORMAT</label>
+    <input id="confirmationId" name="confirmationId" type="text" maxlength="100" placeholder="Enter confirmation ID format (optional)">
+    <p class="optional-note">Optional</p>
+    <p class="form-note">Only places listed in Wayanad, Kerala can be selected.</p>
+    <p class="form-error" id="propertyError" role="alert"></p>
+    <div class="modal-actions"><button class="small-green" type="submit">Apply</button><button class="cancel-btn" id="cancelProperty" type="button">Cancel</button></div>
+  </form>
+</section>
+
+<section class="guest-modal" id="guestModal" role="dialog" aria-modal="true" aria-labelledby="guestModalTitle">
+  <h2 id="guestModalTitle">*GUST DETAILS*</h2>
+  <form id="guestForm">
+    <div class="guest-grid">
+      <div class="guest-field"><label for="guestResort">RESORT NAME</label><input id="guestResort" readonly></div>
+      <div class="guest-field"><label for="guestName">GUST NAME</label><input id="guestName" required maxlength="120" placeholder="Enter guest name"></div>
+      <div class="guest-field"><label for="guestPhone">PHONE NUMBER</label><div style="display:flex;align-items:center;border:1px solid #d5dee6;border-radius:7px;background:#fff;overflow:hidden"><span style="padding:11px;background:#f1f6f8;font-weight:800;color:#263545;border-right:1px solid #d5dee6">+91</span><input id="guestPhone" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" minlength="10" required placeholder="10-digit mobile number" aria-describedby="guestPhoneHint" style="border:0;outline:0;flex:1;min-width:0"></div><small id="guestPhoneHint" style="display:block;margin-top:5px;color:#667788">Enter exactly 10 digits after +91.</small></div>
+      <div class="guest-field"><label for="numberAdults">NUMBER OF ADULT</label><input id="numberAdults" type="number" min="1" step="1" value="2" required placeholder="Enter number of adults"></div>
+      <div class="guest-field"><label for="numberKids">NUMBER OF KIDS</label><input id="numberKids" type="number" min="0" step="1" value="0" required></div>
+      <div class="guest-field"><label>DATE</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="dateFrom" type="date" aria-label="From date" required><input id="dateTo" type="date" aria-label="To date" required></div></div>
+      <div class="guest-field"><label for="numberNights">NUMBER OF NIGHT</label><input id="numberNights" readonly value="0"></div>
+      <div class="guest-field"><label for="totalRate">TOTAL RATE (₹)</label><input id="totalRate" type="number" min="0" step="0.01" required placeholder="Enter total rate"></div>
+      <div class="guest-field"><label for="agentChoice">AGENT</label><select id="agentChoice"><option value="No">NO</option><option value="Yes">YES</option></select></div>
+      <div class="guest-field agent-profit-field" id="agentProfitField" hidden><label for="agentProfit">AGENT PROFIT (₹)</label><input id="agentProfit" type="number" min="0" step="0.01" placeholder="Enter agent profit"></div>
+      <div class="guest-field"><label for="myProfit">MY PROFIT (₹)</label><input id="myProfit" type="number" min="0" step="0.01" required placeholder="Enter my profit"></div>
+      <div class="guest-field"><label for="paymentStatus">PAYMENT STATUS</label><select id="paymentStatus"><option>NOT PAID</option><option>PAID</option></select></div>
+    </div>
+    <p class="form-error" id="guestError" role="alert"></p>
+    <div class="guest-actions"><button class="cancel-btn" id="cancelGuest" type="button">Cancel</button><button class="print-button" id="printGuest" type="button">PRINT</button><button class="small-green" type="submit">SAVE</button></div>
+  </form>
+</section>
+
+<section class="report-modal" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+  <h2 id="reportTitle">PROPERTY GUEST REPORT</h2>
+  <div class="report-options">
+    <button class="small-green" type="button" data-report-range="30">LAST 30 DAYS</button>
+    <button class="small-green" type="button" data-report-range="90">LAST 90 DAYS</button>
+    <button class="small-green" type="button" data-report-range="all">FULL BILL</button>
+    <button class="cancel-btn" id="closeReport" type="button">CLOSE</button>
+  </div>
+  <div id="reportOutput">Choose a section above to view the guest details.</div>
+  <div class="report-save-row"><button class="small-green" id="saveReportPdf" type="button" hidden>SAVE PDF</button></div>
+</section>
+
+<button class="pencil-button" id="addPropertyButton" type="button" aria-label="Add a property" title="Add a property">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.04a1 1 0 0 0 0-1.41l-2.5-2.5a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.99-1.67z"/></svg>
+</button>
+<script>
+  // Demo-only client-side login. Do not use hard-coded credentials for real security.
+  const allowedAdmins = ["AFLAHRESORT", "Aflahresort"];
+  const allowedPasswords = [
+    "AFLAHVELLATHOOR@GMAIL.COM",
+    "Aflahvellathoor@gmail.com",
+    "aflahvellathoor@gmail.com"
+  ];
+  const loginForm = document.getElementById("loginForm");
+  const loginScreen = document.getElementById("loginScreen");
+  const dashboard = document.getElementById("dashboard");
+  const error = document.getElementById("error");
+
+  loginForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const admin = document.getElementById("admin").value.trim();
+    const password = document.getElementById("password").value;
+    const adminOk = allowedAdmins.some(value => value.toLowerCase() === admin.toLowerCase());
+    const passwordOk = allowedPasswords.includes(password);
+    if (adminOk && passwordOk) {
+      error.textContent = "";
+      loginScreen.style.display = "none";
+      dashboard.style.display = "block";
+      document.getElementById("search").focus();
+    } else {
+      error.textContent = "Incorrect admin or password. Please try again.";
+    }
+  });
+  document.getElementById("logout").addEventListener("click", () => {
+    dashboard.style.display = "none";
+    detailView.style.display = "none";
+    guestModal.style.display = "none";
+    loginScreen.style.display = "flex";
+    loginForm.reset();
+    error.textContent = "";
+  });
+  const propertyModal = document.getElementById("propertyModal");
+  const propertyForm = document.getElementById("propertyForm");
+  const propertyGrid = document.getElementById("propertyGrid");
+  const propertyNameInput = document.getElementById("propertyName");
+  const propertyPlaceInput = document.getElementById("propertyPlace");
+  const propertyError = document.getElementById("propertyError");
+  const wayanadPlaces = new Set(Array.from(propertyPlaceInput.options).map(option => option.value).filter(Boolean));
+  let properties = [];
+  try { properties = JSON.parse(localStorage.getItem("aflahWayanadProperties") || "[]"); } catch (_) { properties = []; }
+
+  function renderSummary() {
+    const paid = guestRecords.filter(r => String(r.paymentStatus || "").toUpperCase() === "PAID")
+      .reduce((sum, r) => sum + (Number(r.myProfit) || 0), 0);
+    const unpaid = guestRecords.filter(r => String(r.paymentStatus || "").toUpperCase() !== "PAID")
+      .reduce((sum, r) => sum + (Number(r.myProfit) || 0), 0);
+    const formatRupees = value => "₹" + value.toLocaleString("en-IN", {maximumFractionDigits:2});
+    const paidBox = document.getElementById("paidIncome");
+    const unpaidBox = document.getElementById("unpaidIncome");
+    if (paidBox) paidBox.textContent = formatRupees(paid);
+    if (unpaidBox) unpaidBox.textContent = "-₹" + Math.abs(unpaid).toLocaleString("en-IN", {maximumFractionDigits:2});
+  }
+
+  function renderProperties(filter = "") {
+    propertyGrid.replaceChildren();
+    const query = filter.trim().toLowerCase();
+    const visible = properties.filter(item => !query || item.name.toLowerCase().includes(query) || item.place.toLowerCase().includes(query));
+    visible.forEach(item => {
+      const card = document.createElement("article");
+      card.className = "property-card";
+      const title = document.createElement("h3");
+      title.textContent = item.name;
+      const label = document.createElement("div");
+      label.className = "place-label";
+      label.textContent = "PLACE";
+      const place = document.createElement("p");
+      place.className = "place-value";
+      place.textContent = item.place + ", Wayanad, Kerala";
+      const open = document.createElement("button");
+      open.className = "small-green";
+      open.type = "button";
+      open.textContent = "Open";
+      open.addEventListener("click", () => openProperty(item));
+      const remove = document.createElement("button");
+      remove.className = "small-red"; remove.type = "button"; remove.textContent = "Delete";
+      remove.addEventListener("click", () => {
+        if (!confirm(`Delete property "${item.name}" and its guest details?`)) return;
+        properties = properties.filter(p => p.id !== item.id);
+        guestRecords = guestRecords.filter(r => r.propertyId !== item.id);
+        try { localStorage.setItem("aflahWayanadProperties", JSON.stringify(properties)); persistGuestRecords(); } catch (_) {}
+        renderProperties(document.getElementById("search").value);
+      });
+      card.append(title, label, place, open, remove);
+      propertyGrid.append(card);
+    });
+    if (query && visible.length === 0) document.getElementById("searchMessage").textContent = "No matching properties found.";
+    else document.getElementById("searchMessage").textContent = properties.length ? "" : "No properties added yet. Use the pencil button to add one.";
+    renderSummary();
+  }
+
+  function openModal() {
+    propertyError.textContent = "";
+    propertyForm.reset();
+    propertyModal.style.display = "block";
+    propertyNameInput.focus();
+  }
+  function closeModal() { propertyModal.style.display = "none"; }
+  document.getElementById("addPropertyButton").addEventListener("click", openModal);
+  document.getElementById("cancelProperty").addEventListener("click", closeModal);
+  propertyForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const name = propertyNameInput.value.trim();
+    const place = propertyPlaceInput.value;
+    if (!name) { propertyError.textContent = "Please enter a property name."; return; }
+    if (!wayanadPlaces.has(place)) { propertyError.textContent = "Please choose a valid place in Wayanad, Kerala."; return; }
+    const property = { id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), name, place, confirmationId: document.getElementById("confirmationId").value.trim() };
+    properties.push(property);
+    try { localStorage.setItem("aflahWayanadProperties", JSON.stringify(properties)); }
+    catch (_) { propertyError.textContent = "Could not save details in this browser. Please check storage settings."; properties.pop(); return; }
+    closeModal();
+    renderProperties(document.getElementById("search").value);
+  });
+
+
+  const detailView = document.getElementById("detailView");
+  const guestModal = document.getElementById("guestModal");
+  const guestForm = document.getElementById("guestForm");
+  const guestError = document.getElementById("guestError");
+  const guestResort = document.getElementById("guestResort");
+  const addPropertyButton = document.getElementById("addPropertyButton");
+  let activeProperty = null;
+  let editingGuestId = null;
+  let guestRecords = [];
+  try { guestRecords = JSON.parse(localStorage.getItem("aflahGuestDetails") || "[]"); } catch (_) { guestRecords = []; }
+
+  function persistGuestRecords() {
+    localStorage.setItem("aflahGuestDetails", JSON.stringify(guestRecords));
+  }
+  function openProperty(item) {
+    activeProperty = item;
+    dashboard.style.display = "none";
+    detailView.style.display = "block";
+    addPropertyButton.style.display = "grid";
+    document.getElementById("detailPropertyName").textContent = item.name;
+    document.getElementById("detailPropertyPlace").textContent = item.place + ", Wayanad, Kerala";
+    renderGuestRecords();
+    window.scrollTo(0, 0);
+  }
+  function renderGuestRecords() {
+    const host = document.getElementById("guestRecords");
+    host.replaceChildren();
+    const records = guestRecords.filter(r => r.propertyId === activeProperty?.id);
+    if (!records.length) { host.textContent = "No guest details saved yet."; return; }
+    const table = document.createElement("table");
+    const headers = ["GUEST NAME","ADULTS","KIDS","DATE FROM","DATE TO","NIGHTS","TOTAL RATE (₹)","AGENT","AGENT PROFIT (₹)","MY PROFIT (₹)","PAYMENT STATUS","ACTION"];
+    const thead = document.createElement("thead"), headRow = document.createElement("tr");
+    headers.forEach(h => { const th=document.createElement("th"); th.textContent=h; headRow.append(th); });
+    thead.append(headRow); table.append(thead);
+    const tbody = document.createElement("tbody");
+    records.forEach(r => {
+      const tr = document.createElement("tr");
+      [r.guestName,r.phoneNumber || "—",r.adults ?? 2,r.kids ?? 0,r.dateFrom,r.dateTo,r.nights,r.totalRate,r.agent,r.agentProfit || "—",r.myProfit,r.paymentStatus].forEach(v => { const td=document.createElement("td"); td.textContent=String(v); tr.append(td); });
+      const actionCell = document.createElement("td");
+      const editGuest = document.createElement("button"); editGuest.className="small-green"; editGuest.textContent="Edit"; editGuest.type="button";
+      editGuest.addEventListener("click", () => openGuestModal(r));
+      const removeGuest = document.createElement("button"); removeGuest.className="small-red"; removeGuest.textContent="Delete"; removeGuest.type="button";
+      removeGuest.addEventListener("click", () => { if (!confirm(`Delete guest details for ${r.guestName}?`)) return; guestRecords = guestRecords.filter(item => item.id !== r.id); persistGuestRecords(); renderGuestRecords(); renderSummary(); });
+      actionCell.append(editGuest, removeGuest); tr.append(actionCell); tbody.append(tr);
+    });
+    table.append(tbody); host.append(table);
+  }
+  function openGuestModal(record = null) {
+    if (!activeProperty) return;
+    editingGuestId = record?.id || null;
+    guestForm.reset();
+    guestError.textContent = "";
+    guestResort.value = activeProperty.name;
+    document.getElementById("numberAdults").value = record?.adults ?? 2;
+    document.getElementById("numberKids").value = record?.kids ?? 0;
+    document.getElementById("dateFrom").value = record?.dateFrom || "";
+    document.getElementById("dateTo").value = record?.dateTo || "";
+    document.getElementById("totalRate").value = record?.totalRate ?? "";
+    document.getElementById("agentChoice").value = record?.agent || "No";
+    document.getElementById("agentProfit").value = record?.agentProfit ?? "";
+    document.getElementById("myProfit").value = record?.myProfit ?? "";
+    document.getElementById("paymentStatus").value = record?.paymentStatus || "NOT PAID";
+    document.getElementById("guestName").value = record?.guestName || "";
+    document.getElementById("guestPhone").value = String(record?.phoneNumber || "").replace(/^\+91/, "");
+    document.getElementById("numberNights").value = record?.nights ?? 0;
+    document.getElementById("guestModalTitle").textContent = record ? "*EDIT GUST DETAILS*" : "*GUST DETAILS*";
+    document.querySelector('#guestForm button[type="submit"]').textContent = record ? "UPDATE" : "SAVE";
+    document.getElementById("agentProfitField").hidden = !record || record.agent !== "Yes";
+    document.getElementById("agentProfit").required = !!record && record.agent === "Yes";
+    updateNights();
+    guestModal.style.display = "block";
+    document.getElementById("guestName").focus();
+  }
+  function closeGuestModal() { guestModal.style.display = "none"; }
+  function updateNights() {
+    const from = document.getElementById("dateFrom").value;
+    const to = document.getElementById("dateTo").value;
+    const nights = from && to ? Math.round((new Date(to+"T00:00:00") - new Date(from+"T00:00:00")) / 86400000) : 0;
+    document.getElementById("numberNights").value = Math.max(0,nights);
+    document.getElementById("dateTo").min = from || "";
+    if (from && to && nights < 0) guestError.textContent = "The TO date must be on or after the FROM date.";
+    else guestError.textContent = "";
+  }
+  document.getElementById("dateFrom").addEventListener("change", updateNights);
+  document.getElementById("dateTo").addEventListener("change", updateNights);
+  document.getElementById("agentChoice").addEventListener("change", event => {
+    const show = event.target.value === "Yes";
+    document.getElementById("agentProfitField").hidden = !show;
+    document.getElementById("agentProfit").required = show;
+    if (!show) document.getElementById("agentProfit").value = "";
+  });
+  addPropertyButton.addEventListener("click", () => {
+    if (detailView.style.display === "block") openGuestModal();
+    else openModal();
+  });
+  document.getElementById("cancelGuest").addEventListener("click", closeGuestModal);
+  document.getElementById("backToProperties").addEventListener("click", () => {
+    detailView.style.display = "none";
+    dashboard.style.display = "block";
+    addPropertyButton.style.display = "grid";
+    window.scrollTo(0,0);
+  });
+  guestForm.addEventListener("submit", event => {
+    event.preventDefault();
+    updateNights();
+    const dateFrom = document.getElementById("dateFrom").value;
+    const dateTo = document.getElementById("dateTo").value;
+    const nights = Number(document.getElementById("numberNights").value);
+    if (!dateFrom || !dateTo || nights < 0) { guestError.textContent = "Please choose a valid date range."; return; }
+    const phoneDigits = document.getElementById("guestPhone").value.trim();
+    if (!/^[0-9]{10}$/.test(phoneDigits)) { guestError.textContent = "Please enter a valid 10-digit Indian mobile number after +91."; document.getElementById("guestPhone").focus(); return; }
+    const agent = document.getElementById("agentChoice").value;
+    const record = {
+      id: editingGuestId || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+      propertyId: activeProperty.id, propertyName: activeProperty.name,
+      guestName: document.getElementById("guestName").value.trim(),
+      phoneNumber: "+91" + phoneDigits,
+      adults: Math.max(1, Number(document.getElementById("numberAdults").value) || 1),
+      kids: Math.max(0, Number(document.getElementById("numberKids").value) || 0),
+      dateFrom, dateTo, nights,
+      totalRate: Number(document.getElementById("totalRate").value),
+      agent, agentProfit: agent === "Yes" ? Number(document.getElementById("agentProfit").value) : "",
+      myProfit: Number(document.getElementById("myProfit").value),
+      paymentStatus: document.getElementById("paymentStatus").value
+    };
+    if (!record.guestName) { guestError.textContent = "Please enter the guest name."; return; }
+    const previousIndex = editingGuestId ? guestRecords.findIndex(item => item.id === editingGuestId) : -1;
+    const previousRecord = previousIndex >= 0 ? guestRecords[previousIndex] : null;
+    try {
+      if (previousIndex >= 0) guestRecords[previousIndex] = record;
+      else guestRecords.push(record);
+      persistGuestRecords();
+    } catch (_) {
+      if (previousIndex >= 0 && previousRecord) guestRecords[previousIndex] = previousRecord;
+      else guestRecords.pop();
+      guestError.textContent = "Could not save in this browser. Check storage settings."; return;
+    }
+    editingGuestId = null;
+    closeGuestModal();
+    addPropertyButton.style.display = "grid";
+    renderGuestRecords();
+    renderSummary();
+  });
+  
+  const reportModal = document.getElementById("reportModal");
+  let activeReport = null;
+  document.getElementById("propertyPrintButton").addEventListener("click", () => {
+    reportModal.style.display="block";
+    document.getElementById("reportOutput").textContent="Choose Last 30 Days, Last 90 Days, or Full Bill.";
+    document.getElementById("saveReportPdf").hidden = true;
+    activeReport = null;
+  });
+  document.getElementById("closeReport").addEventListener("click", () => { reportModal.style.display="none"; });
+  document.querySelectorAll("[data-report-range]").forEach(button => button.addEventListener("click", () => {
+    const range = button.dataset.reportRange;
+    const now = new Date();
+    let startDate = null, endDate = null;
+    if (range !== "all") {
+      // Calendar-month windows: current month, or current + previous two months.
+      startDate = new Date(now.getFullYear(), now.getMonth() - (range === "90" ? 2 : 0), 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endDate.setHours(23,59,59,999);
+    }
+    const records = guestRecords.filter(r => r.propertyId === activeProperty?.id).filter(r => {
+      if (range === "all") return true;
+      if (!r.dateFrom) return false;
+      const d = new Date(r.dateFrom + "T00:00:00");
+      return d >= startDate && d <= endDate;
+    }).sort((a,b)=>(a.dateFrom||"").localeCompare(b.dateFrom||""));
+    const label = range === "all" ? "FULL BILL" : (range === "30" ? "CURRENT MONTH" : "CURRENT + PREVIOUS 2 MONTHS");
+    activeReport = { propertyName: activeProperty?.name || "Property", label, records };
+    const host = document.getElementById("reportOutput"); host.replaceChildren();
+    const heading = document.createElement("h3"); heading.textContent = `GUEST DETAILS · ${label} — ${activeProperty.name}`; host.append(heading);
+    const saveButton = document.getElementById("saveReportPdf"); saveButton.hidden = false;
+    if (!records.length) { const p=document.createElement("p"); p.textContent="No guest details found for this period."; host.append(p); return; }
+    const wrap=document.createElement("div"); wrap.className="report-table-wrap"; const table=document.createElement("table"); table.className="report-table";
+    const headers=["GUEST NAME","PHONE NUMBER","ADULTS","KIDS","DATE FROM","DATE TO","NIGHTS","TOTAL RATE (₹)","AGENT","AGENT PROFIT (₹)","MY PROFIT (₹)","PAYMENT STATUS"];
+    const thead=document.createElement("thead"), hr=document.createElement("tr"); headers.forEach(h=>{const th=document.createElement("th");th.textContent=h;hr.append(th)});thead.append(hr);table.append(thead);
+    const tbody=document.createElement("tbody"); records.forEach(r=>{const tr=document.createElement("tr");[r.guestName,r.phoneNumber||"—",r.adults??2,r.kids??0,r.dateFrom,r.dateTo,r.nights,r.totalRate,r.agent,r.agentProfit||"—",r.myProfit,r.paymentStatus].forEach(v=>{const td=document.createElement("td");td.textContent=String(v??"");tr.append(td)});tbody.append(tr)});table.append(tbody);wrap.append(table);host.append(wrap);
+  }));
+
+  function makePdf(report) {
+    const clean = value => String(value ?? "").normalize("NFKD").replace(/[^\x20-\x7E]/g, " ").replace(/\s+/g, " ").trim();
+    const headers = ["GUEST NAME","PHONE NUMBER","ADULTS","KIDS","DATE FROM","DATE TO","NIGHTS","TOTAL RATE Rs","AGENT","AGENT PROFIT Rs","MY PROFIT Rs","PAYMENT"];
+    const widths = [18,14,5,4,10,10,5,11,5,12,11,10];
+    const fit = (value, width) => clean(value).slice(0,width).padEnd(width," ");
+    const lines = ["AFLAH RESORT BOOKING - " + clean(report.propertyName), "GUEST REPORT: " + clean(report.label), "", headers.map((h,i)=>fit(h,widths[i])).join(" | "), "-".repeat(125)];
+    report.records.forEach(r => lines.push([
+      r.guestName, r.phoneNumber || "-", r.adults ?? 2, r.kids ?? 0, r.dateFrom, r.dateTo, r.nights,
+      r.totalRate, r.agent, r.agentProfit || "-", r.myProfit, r.paymentStatus
+    ].map((v,i)=>fit(v,widths[i])).join(" | ")));
+    if (!report.records.length) lines.push("No guest details found for this period.");
+    const pages=[]; for(let i=0;i<lines.length;i+=43) pages.push(lines.slice(i,i+43));
+    const objects=[]; const add=obj=>{objects.push(obj);return objects.length;};
+    const catalogId=add(""), pagesId=add("");
+    const fontId=add("<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>");
+    const pageIds=[];
+    pages.forEach((pageLines, pageIndex)=>{
+      let stream="BT\n/F1 7 Tf\n28 565 Td\n";
+      pageLines.forEach((line,index)=>{
+        if(index>0) stream += "0 -12 Td\n";
+        const escaped=line.replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");
+        stream += "("+escaped+") Tj\n";
+      });
+      stream += "ET";
+      const contentId=add(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+      const pageId=add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+      pageIds.push(pageId);
+    });
+    objects[catalogId-1]=`<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
+    objects[pagesId-1]=`<< /Type /Pages /Kids [${pageIds.map(id=>id+" 0 R").join(" ")}] /Count ${pageIds.length} >>`;
+    let pdf="%PDF-1.4\n"; const offsets=[0];
+    objects.forEach((obj,i)=>{offsets.push(pdf.length);pdf += `${i+1} 0 obj\n${obj}\nendobj\n`;});
+    const xref=pdf.length; pdf += `xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;
+    for(let i=1;i<offsets.length;i++) pdf += String(offsets[i]).padStart(10,"0")+" 00000 n \n";
+    pdf += `trailer\n<< /Size ${objects.length+1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+    return new Blob([pdf], {type:"application/pdf"});
+  }
+  document.getElementById("saveReportPdf").addEventListener("click", () => {
+    if (!activeReport) return;
+    const blob = makePdf(activeReport);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${activeReport.propertyName.replace(/[^a-z0-9-_]+/gi,"_")}_${activeReport.label.replace(/[^a-z0-9-_]+/gi,"_")}.pdf`;
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  });
+  document.getElementById("search").addEventListener("input", event => renderProperties(event.target.value));
+  renderProperties();
+</script>
+</body>
+</html>
